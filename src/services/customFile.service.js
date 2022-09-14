@@ -9,18 +9,14 @@ class CustomFileService {
 
   constructor() {}
 
-  getExt = (file) => {
-    return `${file.match(/\.[0-9a-z]+$/i)}`;
-  };
+  getExt = (file) => `${file.match(/\.[0-9a-z]+$/i)}`;
+  filePath = (id) => path.join(__dirname, `../../${this.path}${id}`);
 
   async findOne(id) {
-    const findPath = path.join(__dirname, `../../${this.path}${id}`);
-    if (!fs.existsSync(findPath)) {
-      console.log("Not found !!!!!!!!!!!!");
-      console.log(findPath);
+    if (!fs.existsSync(this.filePath(id))) {
       throw boom.notFound(errorCodes.NOT_FOUND.name, errorCodes.NOT_FOUND);
     }
-    return findPath;
+    return this.filePath(id);
   }
 
   async create(files) {
@@ -29,12 +25,17 @@ class CustomFileService {
     return { fileRef: `${file.md5}${this.getExt(file.name)}` };
   }
 
-  async update(id, file) {
-    return {};
+  async update(id, files) {
+    const obj = await this.findOne(id);
+    fs.unlinkSync(obj);
+    const create = await this.create(files);
+    return create;
   }
 
   async delete(id) {
-    return {};
+    const obj = await this.findOne(id);
+    fs.unlinkSync(obj);
+    return id;
   }
 }
 

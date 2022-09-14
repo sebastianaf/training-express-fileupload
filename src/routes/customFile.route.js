@@ -18,9 +18,7 @@ router.get(
   async (req, res, next) => {
     try {
       const result = await service.findOne(req.query._id);
-      console.log(result);
-      res.status(200).sendFile(result);
-      next();
+      res.download(result);
     } catch (error) {
       next(error);
     }
@@ -34,7 +32,6 @@ router.post(
     try {
       const result = await service.create(req.files);
       res.status(200).json({ statusCode: 200, error: null, data: result });
-      next();
     } catch (error) {
       next(error);
     }
@@ -44,12 +41,11 @@ router.post(
 router.patch(
   "/",
   validatorHandler(getIdCustomFileSchema, `query`),
-  validatorHandler(patchCustomFileSchema, `body`),
+  validatorHandler(patchCustomFileSchema, `files`),
   async (req, res, next) => {
     try {
-      const result = await service.update(req.query._id, req.body);
+      const result = await service.update(req.query._id, req.files);
       res.status(200).json({ statusCode: 200, error: null, data: result });
-      next();
     } catch (error) {
       next(error);
     }
@@ -63,7 +59,6 @@ router.delete(
     try {
       const result = await service.delete(req.query._id);
       res.status(200).json({ statusCode: 200, error: null, data: result });
-      next();
     } catch (error) {
       next(error);
     }
