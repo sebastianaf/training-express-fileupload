@@ -1,0 +1,84 @@
+version: "3.8"
+
+services:
+  org-project-api:
+    container_name: org-project-api
+    image: org-project-api
+    restart: always
+    environment:
+      API_CLIENT: ${API_CLIENT}
+      API_TOKEN: ${API_TOKEN}
+      API_TOKEN_EXPIRATION_TIME: ${API_TOKEN_EXPIRATION_TIME}
+      API_CREATE_ADMIN: ${API_CREATE_ADMIN}
+      API_LOG: ${API_LOG}
+      API_PORT: ${API_PORT}
+      #org-project-db-01
+      DB_USERS_DATABASE: ${DB_USERS_DATABASE}
+      DB_USERS_USER: ${DB_USERS_USER}
+      DB_USERS_PASSWORD: ${DB_USERS_PASSWORD}
+      DB_USERS_HOST: ${DB_USERS_HOST}
+            
+      TZ: ${TZ}
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        API_PORT: ${API_PORT}
+#    ports:
+#      - ${API_PORT}:${API_PORT}
+    depends_on:
+      - org-project-db-01
+    networks:
+      - org-project
+
+  org-project-db-01:
+    container_name: org-project-db-01
+    image: mongo:4.4.15
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${DB_USERS_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${DB_USERS_PASSWORD}
+      MONGO_INITDB_DATABASE: ${DB_USERS_DATABASE}
+    volumes:
+      - ./db-01:/data/db
+#    ports:
+#      - ${DB_USERS_PORT}:27017
+    networks:
+      - org-project
+
+  org-project-mongoexpress:
+    container_name: org-project-mongoexpress
+    image: mongo-express
+    restart: always
+    environment:
+      ME_CONFIG_BASICAUTH_USERNAME: ${DB_MONGOEXPRESS_USER}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${DB_MONGOEXPRESS_PASSWORD}
+      #org-project-db-02
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${DB_USERS_USER}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${DB_USERS_PASSWORD}
+      ME_CONFIG_MONGODB_URL: ${DB_MONGOEXPRESS_URL}
+    depends_on:
+      - org-project-db-01
+#    ports:
+#      - ${DB_MONGOEXPRESS_PORT}:8081
+    networks:
+      - org-project
+
+  org-project-duckdns:
+    container_name: org-project-duckdns
+    restart: always
+    image: ghcr.io/linuxserver/duckdns
+    environment:
+      PUID: ${DDNS_PUID}
+      PGID: ${DDNS_PGID}
+      SUBDOMAINS: ${DDNS_SUBDOMAINS}
+      DUCKDNS_TOKEN: ${DDNS_TOKEN}
+      LOG_FILE: ${DDNS_LOGFILE}
+
+      TZ: ${TZ}
+    networks:
+      - org-project
+
+networks:
+  org-project:
+    name: org-project
