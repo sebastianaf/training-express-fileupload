@@ -1,15 +1,14 @@
 version: "3.8"
 
 services:
-  org-project-api:
-    container_name: org-project-api
-    image: org-project-api
+  org-project-api-files:
+    container_name: org-project-api-files
+    image: org-project-api-files
     restart: always
     environment:
-      API_CLIENT: ${API_CLIENT}
+      API_CLIENT: ${API_FILES_CLIENT}
       API_TOKEN: ${API_TOKEN}
       API_TOKEN_EXPIRATION_TIME: ${API_TOKEN_EXPIRATION_TIME}
-      API_CREATE_ADMIN: ${API_CREATE_ADMIN}
       API_LOG: ${API_LOG}
       API_PORT: ${API_PORT}
       #org-project-db-01
